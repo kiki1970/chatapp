@@ -9,7 +9,7 @@ from tornado.web import url
 import tornado.escape
 import tornado.options
 from tornado.options import define, options
-
+import sqlite3
 import logging
 
 define("port", default=5000, type=int)
@@ -39,20 +39,38 @@ class AuthLoginHandler(BaseHandler):
         self.render("login.html")
 
     def post(self):
+        connector = sqlite3.connect("userdata.db")
+        cursor = connector.cursor()
+
         logging.debug("xsrf_cookie:" + self.get_argument("_xsrf", None))
 
         self.check_xsrf_cookie()
 
+
         username = self.get_argument("username")
         password = self.get_argument("password")
 
-        logging.debug('AuthLoginHandler:post %s %s' % (username, password))
-
-        if username == options.username and password == options.password:
-            self.set_current_user(username)
-            self.redirect("/")
-        else:
+        cursor.execute("select * from users where username='"+username+"'")
+        result = cursor.fetchall()
+        print(result)
+        if len(result) == 0:
+            cursor.close()
+            connector.close()
             self.write_error(403)
+        else:
+            for row in result:
+                password_true = row[1]
+            logging.debug('AuthLoginHandler:post %s %s' % (username, password))
+
+            if password == password_true:
+                cursor.close()
+                connector.close()
+                self.set_current_user(username)
+                self.redirect("/")
+            else:
+                cursor.close()
+                connector.close()
+                self.write_error(403)
 
 
 class AuthLogoutHandler(BaseHandler):
