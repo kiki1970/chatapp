@@ -16,6 +16,8 @@ define("port", default=5000, type=int)
 define("username", default="user")
 define("password", default="pass")
 
+myUser=""
+
 class BaseHandler(tornado.web.RequestHandler):
 
     cookie_username = "username"
@@ -65,6 +67,12 @@ class AuthLoginHandler(BaseHandler):
             if password == password_true:
                 cursor.close()
                 connector.close()
+ 
+                global myUser
+                myUser = username
+                #print("myUser:")
+                #print(myUser)
+
                 self.set_current_user(username)
                 self.redirect("/")
             else:
@@ -83,8 +91,13 @@ class AuthLogoutHandler(BaseHandler):
 class IndexHandler(BaseHandler):
     @tornado.web.authenticated
     def get(self, *args, **kwargs):
-        face_pics = ['cat.gif', 'fere.gif', 'lion.gif']
-        img_name = random.choice(face_pics)
+        #face_pics = ['cat.gif', 'fere.gif', 'lion.gif']
+        #img_name = random.choice(face_pics)
+        #print("myUser:")
+        #print(myUser)
+        img_name = myUser + '.gif'
+        #print("img_name")
+        #print(img_name)
         self.render('index.html', img_path=self.static_url('images/' + img_name))
 
 
