@@ -95,7 +95,10 @@ class IndexHandler(BaseHandler):
         #img_name = random.choice(face_pics)
         #print("myUser:")
         #print(myUser)
-        img_name = myUser + '.gif'
+        if myUser != "":
+            img_name = myUser + '.gif'
+        else:
+            img_name = 'lion.gif'
         #print("img_name")
         #print(img_name)
         self.render('index.html', img_path=self.static_url('images/' + img_name))
@@ -107,10 +110,12 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
     messages = []
 
     def open(self, *args, **kwargs):
+        print("open")
         self.waiters.add(self)
         self.write_message({'messages': self.messages})
 
     def on_message(self, message):
+        print("message")
         message = json.loads(message)
         self.messages.append(message)
         for waiter in self.waiters:
@@ -119,6 +124,7 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
             waiter.write_message({'img_path': message['img_path'], 'message': message['message']})
 
     def on_close(self):
+        print("close")
         self.waiters.remove(self)
 
 
