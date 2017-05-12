@@ -8,7 +8,10 @@
     <script src="{{ static_url('js/jquery.ui.chatbox.js') }}"></script>
 
     <script>
-        var socket = new WebSocket('ws://' + location.host + '/chat');
+        var socket = new WebSocket('ws://' + location.host + '/chat?group=all');
+        socket.onopen = onOpen;
+        socket.onclose = onClose;
+        socket.onmessage = onMessage;
 
         function sendAction(img_path, msg) {
 
@@ -20,13 +23,13 @@
             socket.send(JSON.stringify(message));
         }
 
-        socket.onopen = function(data) {
+        function onOpen(data) {
         }
 
-        socket.onclose = function() {
+        function onClose() {
         }
 
-        socket.onmessage = function(event) {
+        function onMessage(event) {
             var data = JSON.parse(event.data);
             if ('messages' in data) {
                 var messages = data.messages;
@@ -36,6 +39,13 @@
             } else {
                 $("#chat_div").chatbox("option", "boxManager").addMsg(data.img_path, data.message, false);
             }
+        }
+        function OnLinkClick() {
+            socket.close();
+            socket = new WebSocket('ws://' + location.host + '/chat?group=group1');
+            socket.onopen = onOpen;
+            socket.onclose = onClose;
+            socket.onmessage = onMessage;
         }
 
         $(document).ready(function() {
@@ -56,7 +66,9 @@
 <body>
     <img src="{{ img_path }}" id="face" style="visibility:hidden">
     <div id="chat_div" class="chat"></div>
+
 	宛先指定
     <a href=/auth/logout>Logout</a>
+    <a href="javascript:void(0);" onclick="OnLinkClick();">グループ1</a><br />
 </body>
 </html>
