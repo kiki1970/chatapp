@@ -95,7 +95,10 @@ class IndexHandler(BaseHandler):
         #img_name = random.choice(face_pics)
         #print("myUser:")
         #print(myUser)
-        img_name = myUser + '.gif'
+        if myUser != "":
+            img_name = myUser + '.gif'
+        else:
+            img_name = 'lion.gif'
         #print("img_name")
         #print(img_name)
         self.render('index.html', img_path=self.static_url('images/' + img_name))
