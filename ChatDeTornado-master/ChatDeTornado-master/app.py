@@ -103,23 +103,49 @@ class IndexHandler(BaseHandler):
 
 class ChatHandler(tornado.websocket.WebSocketHandler):
 
-    waiters = set()
-    messages = []
+    groups = ['all']
+    waiters = [[]]
+    messages = [[]]
+    group_members = [[]]
+    groupnumber = 0
+    print('a')
 
     def open(self, *args, **kwargs):
-        self.waiters.add(self)
-        self.write_message({'messages': self.messages})
+        self.groupnumber = 0
+        nowgroup = self.get_argument("group")
+        print('a', flush=True)
+        print(self.get_argument("group"))
+        match = False
+        for group in self.groups:
+            if group == nowgroup:
+                match = True
+                break
+            self.groupnumber += 1
+        if not match :
+            self.groups.append(nowgroup)
+            self.waiters.append([])
+            self.messages.append([])
+        #print >> kwargs
+        self.waiters[self.groupnumber].append(self)
+        self.write_message({'messages': self.messages[self.groupnumber]})
+        print(self.groupnumber)
 
     def on_message(self, message):
+        print(self.groupnumber)
+        print(self.messages[self.groupnumber])
         message = json.loads(message)
-        self.messages.append(message)
-        for waiter in self.waiters:
+        self.messages[self.groupnumber].append(message)
+        print(self.waiters)
+        for waiter in self.waiters[self.groupnumber]:
             if waiter == self:
                 continue
             waiter.write_message({'img_path': message['img_path'], 'message': message['message']})
 
     def on_close(self):
-        self.waiters.remove(self)
+        print('closing')
+        print(self.groupnumber)
+        self.waiters[self.groupnumber].remove(self)
+        print('close')
 
 
 class Application(tornado.web.Application):
@@ -128,7 +154,7 @@ class Application(tornado.web.Application):
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         handlers = [
             url(r'/', IndexHandler, name='index'),
-            url(r'/chat', ChatHandler, name='chat'),
+            url(r'/chat', ChatHandler),
             url(r'/auth/login', AuthLoginHandler),
             url(r'/auth/logout', AuthLogoutHandler),
         ]
