@@ -268,3 +268,9 @@
         }
     });
 }(jQuery));
+
+$(function() {
+    $( "#accordion" ).accordion({
+      collapsible: true
+    });
+  });
