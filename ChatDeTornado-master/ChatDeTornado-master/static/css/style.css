@@ -125,3 +125,30 @@ img {
   -webkit-box-shadow: 0px 0px 0px 3px #C0C0C0;
   margin-top: 5px;
 }
+
+#menu{
+	width: 500px;
+	float: left;
+}
+
+#sub{
+	width: 500px;
+	float: right;
+}
+
+.parent_ac{
+	background-color: #A4CDEB;
+	height: 32px;
+	display: -webkit-flex;
+	display: flex;
+	align-items: center;
+}
+
+.parent_ac:hover{
+	background-color: #3CA5F5
+}
+
+.child_ac{
+	background-color: #D5E9F7;
+	height: auto;
+}
