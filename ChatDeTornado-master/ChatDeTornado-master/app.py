@@ -18,26 +18,7 @@ define("password", default="pass")
 
 myUser=""
 
-class GroupHandler:
-    def get(self):
-        self.render("login.html")
-
-    def post(self):
-        connector = sqlite3.connect("userdata.db")
-        cursor = connector.cursor()
-
-        groupname = self.get_argument("groupname")
-        users = self.get_argument("users")
-
-        insert_sql = 'insert into groups (groupname, users) values(?,?)'
-        print ("insert into messages (groupname, message) values('"+ self.groups[self.groupnumber] +"','"+ json.dumps(message, ensure_ascii=False) +"')")
-        values = (groupname, users)
-        cursor.execute(insert_sql,values)
-        connector.commit()
-        
-        cursor.close()
-        connector.close()
-        
+      
 class BaseHandler(tornado.web.RequestHandler):
 
     cookie_username = "username"
@@ -53,6 +34,44 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def clear_current_user(self):
         self.clear_cookie(self.cookie_username)
+
+
+class GroupHandler(BaseHandler):
+    def get(self):
+        connector = sqlite3.connect("userdata.db")
+        cursor = connector.cursor()
+        cursor.execute("select username from users")
+        result = cursor.fetchall()
+        userlist = []
+        for user in result:
+            userlist.append(user[0])
+        self.render("newgroup.html",users = userlist)
+        cursor.close()
+        connector.close()
+
+    def post(self):
+        connector = sqlite3.connect("userdata.db")
+        cursor = connector.cursor()
+
+        groupname = self.get_argument("groupname")
+        users = self.get_arguments("users")
+        usernames = ','.join(users)
+        insert_sql = 'insert into groups (groupname, users) values(?,?)'
+        values = (groupname, usernames)
+        cursor.execute(insert_sql,values)
+        for user in users:
+            print (user)
+            cursor.execute("select affiliation_group from users where username = '"+user+"'")
+            result = cursor.fetchall()
+            if result[0][0] == None:
+                update_sql = "update users set affiliation_group = '"+ groupname +"' WHERE username = '"+user+"'"
+            else:
+                update_sql = "update users set affiliation_group = '" + result[0][0] +","+ groupname +"' WHERE username = '"+user+"'"
+            cursor.execute(update_sql)
+        connector.commit()
+        
+        cursor.close()
+        connector.close()
 
 
 class AuthLoginHandler(BaseHandler):
@@ -132,7 +151,6 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
     group_members = [[]]
     groupnumber = 0
     print('a')
-
     def open(self, *args, **kwargs):
         self.groupnumber = 0
         nowgroup = self.get_argument("group")
