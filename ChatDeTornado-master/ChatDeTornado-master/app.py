@@ -209,12 +209,16 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         connector = sqlite3.connect("userdata.db")
         cursor = connector.cursor()
         self.waiters[self.groupnumber].append(self)
-        cursor.execute("select message from messages where groupname='"+ nowgroup +"'")
+        cursor.execute("select message,username from messages where groupname='"+ nowgroup +"'")
         result = cursor.fetchall()
         if len(result) != 0:
             for message in result:
-                message = json.loads(message[0])
-                self.write_message({'img_path': message['img_path'], 'message': message['message']})
+                if(message[1] == myUser):
+                    message = json.loads(message[0])
+                    self.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': True})
+                else:
+                    message = json.loads(message[0])
+                    self.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
         cursor.close()
         connector.close()
         print(self.groupnumber)
@@ -226,9 +230,9 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         #self.messages[self.groupnumber].append(message)
         connector = sqlite3.connect("userdata.db")
         cursor = connector.cursor()
-        insert_sql = 'insert into messages (groupname, message) values(?,?)'
-        print ("insert into messages (groupname, message) values('"+ self.groups[self.groupnumber] +"','"+ json.dumps(message, ensure_ascii=False) +"')")
-        values = (self.groups[self.groupnumber], json.dumps(message, ensure_ascii=False))
+        insert_sql = 'insert into messages (groupname, message, username) values(?,?,?)'
+        print ("insert into messages (groupname, message, username) values('"+ self.groups[self.groupnumber] +"','"+ json.dumps(message, ensure_ascii=False) +"','" + myUser +"')")
+        values = (self.groups[self.groupnumber], json.dumps(message, ensure_ascii=False), myUser)
         cursor.execute(insert_sql,values)
         connector.commit()
         cursor.close()
@@ -237,7 +241,7 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         for waiter in self.waiters[self.groupnumber]:
             if waiter == self:
                 continue
-            waiter.write_message({'img_path': message['img_path'], 'message': message['message']})
+            waiter.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
 
     def on_close(self):
         print(self.groupnumber)
