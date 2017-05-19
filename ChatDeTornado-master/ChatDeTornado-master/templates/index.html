@@ -14,7 +14,7 @@
     </script>
 
 </head>
-<body>
+<body onBlur="focus_state = false;" onfocus="focus_state = true;">
   <div id = "menu">
     <div id="accordion">
       <h3 class = "parent_ac">トーク一覧</h3>
@@ -82,12 +82,21 @@
         }
 
         function onOpen(data) {
+          window.webkitNotifications.createNotification(
+                                      /* icon: プロフィールアイコン */
+                                      NULL,
+                                      /* title: スクリーンネーム */
+                                      "aa",
+                                      /* body: ツイート内容 */
+                                      "aa"
+                                  ).show();
         }
 
         function onClose() {
         }
 
         function onMessage(event) {
+
             var data = JSON.parse(event.data);
             if ('messages' in data) {
                 var messages = data.messages;
