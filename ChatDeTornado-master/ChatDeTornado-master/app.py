@@ -69,7 +69,7 @@ class GroupHandler(BaseHandler):
                 update_sql = "update users set affiliation_group = '" + result[0][0] +","+ groupname +"' WHERE username = '"+user+"'"
             cursor.execute(update_sql)
         connector.commit()
-        
+        self.redirect("/?"+groupname)
         cursor.close()
         connector.close()
 
@@ -140,8 +140,47 @@ class IndexHandler(BaseHandler):
             img_name = 'lion.gif'
         #print("img_name")
         #print(img_name)
-        self.render('index.html', img_path=self.static_url('images/' + img_name))
+        connector = sqlite3.connect("userdata.db")
+        cursor = connector.cursor()
+        cursor.execute("select groupname from groups")
+        result = cursor.fetchall()
+        grouplist = []
+        if len(result) != 0:
+            for groupname in result:
+                grouplist.append(groupname[0])
+        cursor.execute("select username from users")
+        result = cursor.fetchall()
+        userlist = []
+        for user in result:
+            if user[0] != myUser:
+                userlist.append(user[0])
+        self.render('index.html', img_path=self.static_url('images/' + img_name),groups = grouplist,users = userlist)
+        cursor.close()
+        connector.close()
 
+    def post(self):
+        connector = sqlite3.connect("userdata.db")
+        cursor = connector.cursor()
+
+        groupname = self.get_argument("groupname")
+        users = self.get_arguments("users")
+        users.append(myUser)
+        usernames = ','.join(users)
+        insert_sql = 'insert into groups (groupname, users) values(?,?)'
+        values = (groupname, usernames)
+        cursor.execute(insert_sql,values)
+        for user in users:
+            print (user)
+            cursor.execute("select affiliation_group from users where username = '"+user+"'")
+            result = cursor.fetchall()
+            if result[0][0] == None:
+                update_sql = "update users set affiliation_group = '"+ groupname +"' WHERE username = '"+user+"'"
+            else:
+                update_sql = "update users set affiliation_group = '" + result[0][0] +","+ groupname +"' WHERE username = '"+user+"'"
+            cursor.execute(update_sql)
+        connector.commit()
+        cursor.close()
+        connector.close()
 
 class ChatHandler(tornado.websocket.WebSocketHandler):
 
