@@ -9,9 +9,10 @@
 
 
 
+
 <script type="text/javascript">
    //読み込み最大記事数
-   var max_length = 5; 
+   var max_length = 4; 
 
   $(function(){
     $.getJSON("https://query.yahooapis.com/v1/public/yql?callback=?", {
@@ -33,6 +34,85 @@
     });
   });
 </script>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$("select#topic_id").change(function(){
+			$("select#topic_id option:selected").each(function(){
+
+				if($('[name = topic]').val() == 1){
+					$('#feed').html("");
+
+					var max_length = 4;
+
+				    $.getJSON("https://query.yahooapis.com/v1/public/yql?callback=?", {
+				      q: "select * from rss where url='https://news.yahoo.co.jp/pickup/rss.xml'",
+     				 format: "json"
+				    }, function(json) {
+    				  for (var i = 0; i < json.query.results.item.length; i++) {
+
+       					if(i == max_length) break;
+
+				        var entry = json.query.results.item[i];
+
+				        var title = entry.title;//記事タイトル
+				        var link = entry.link; //記事へのリンク
+     				   //タイトルを挿入
+ 				       $('#feed').append("<li><a href='" + link  +"'>"+ title +"</a></li>"); 
+
+     				 }
+				    });
+				}else if($('[name = topic]').val() == 2){
+					$('#feed').html("");
+
+					var max_length = 4;
+
+				    $.getJSON("https://query.yahooapis.com/v1/public/yql?callback=?", {
+				      q: "select * from rss where url='https://news.yahoo.co.jp/pickup/entertainment/rss.xml'",
+     				 format: "json"
+				    }, function(json) {
+    				  for (var i = 0; i < json.query.results.item.length; i++) {
+
+       					if(i == max_length) break;
+
+				        var entry = json.query.results.item[i];
+
+				        var title = entry.title;//記事タイトル
+				        var link = entry.link; //記事へのリンク
+     				   //タイトルを挿入
+ 				       $('#feed').append("<li><a href='" + link  +"'>"+ title +"</a></li>"); 
+
+     				 }
+				    });
+				}else if($('[name = topic]').val() == 3){
+					$('#feed').html("");
+
+					var max_length = 4;
+
+				    $.getJSON("https://query.yahooapis.com/v1/public/yql?callback=?", {
+				      q: "select * from rss where url='https://news.yahoo.co.jp/pickup/sports/rss.xml'",
+     				 format: "json"
+				    }, function(json) {
+    				  for (var i = 0; i < json.query.results.item.length; i++) {
+
+       					if(i == max_length) break;
+
+				        var entry = json.query.results.item[i];
+
+				        var title = entry.title;//記事タイトル
+				        var link = entry.link; //記事へのリンク
+     				   //タイトルを挿入
+ 				       $('#feed').append("<li><a href='" + link  +"'>"+ title +"</a></li>"); 
+
+     				 }
+				    });
+				}
+			});
+		});
+	});
+</script>
+
+
 
     <script>
     function ifr(jpURL){
@@ -71,6 +151,12 @@
       <h3 class = "parent_ac">今日のトピック</h3>
         <div class = "child_ac">
           <ul>
+            話題：
+            <select name = "topic" id = "topic_id" style = "width:80px">
+              <option value = "1">主要
+              <option value = "2">エンタメ
+              <option value = "3">スポーツ
+            </select>
             <div id="feed">
             </div>
           </ul>
