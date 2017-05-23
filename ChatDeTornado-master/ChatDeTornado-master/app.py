@@ -17,6 +17,8 @@ define("username", default="user")
 define("password", default="pass")
 
 myUser=""
+nowgroup=""
+img_path=""
 
 class BaseHandler(tornado.web.RequestHandler):
 
@@ -110,7 +112,6 @@ class AuthLoginHandler(BaseHandler):
                 myUser = username
                 #print("myUser:")
                 #print(myUser)
-
                 self.set_current_user(username)
                 self.redirect("/")
             else:
@@ -181,6 +182,26 @@ class IndexHandler(BaseHandler):
         cursor.close()
         connector.close()
 
+class NotificationHandler(tornado.websocket.WebSocketHandler):
+    waiters = []
+    def open(self, *args, **kwargs):
+        self.waiters.append(self)
+        if(self.get_argument("login")=='first'):
+            for waiter in self.waiters:
+                if waiter == self:
+                    continue
+                waiter.write_message({'type': 1, 'username': myUser, 'img_path':img_path})
+        
+    def on_message(self, message):
+        message = json.loads(message)
+        for waiter in self.waiters:
+            if waiter == self:
+                continue
+            print(message)
+            waiter.write_message({'type': 0, 'img_path': message['img_path'], 'message': message['message'],'groupname':nowgroup})
+    def on_close(self):
+        self.waiters.remove(self)
+
 class ChatHandler(tornado.websocket.WebSocketHandler):
 
     groups = ['all']
@@ -214,10 +235,10 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
             for message in result:
                 if(message[1] == myUser):
                     message = json.loads(message[0])
-                    self.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': True})
+                    self.write_message({'type': 2, 'img_path': message['img_path'], 'message': message['message'], 'mymessage': True})
                 else:
                     message = json.loads(message[0])
-                    self.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
+                    self.write_message({'type': 2, 'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
         cursor.close()
         connector.close()
         print(self.groupnumber)
@@ -240,7 +261,7 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         for waiter in self.waiters[self.groupnumber]:
             if waiter == self:
                 continue
-            waiter.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
+            waiter.write_message({'type': 2, 'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
 
     def on_close(self):
         print(self.groupnumber)
@@ -257,6 +278,7 @@ class Application(tornado.web.Application):
             url(r'/newgroup', GroupHandler),
             url(r'/auth/login', AuthLoginHandler),
             url(r'/auth/logout', AuthLogoutHandler),
+            url(r'/notification',NotificationHandler)
         ]
         settings = dict(
             cookie_secret='gaofjawpoer940r34823842398429afadfi4iias',
