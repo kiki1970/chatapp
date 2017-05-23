@@ -154,7 +154,7 @@
                     $("#chat_div").chatbox("option", "boxManager").addMsg(messages[i].img_path, messages[i].message, false);
                 }
             } else {
-                $("#chat_div").chatbox("option", "boxManager").addMsg(data.img_path, data.message, false);
+                $("#chat_div").chatbox("option", "boxManager").addMsg(data.img_path, data.message, data.mymessage);
             }
         }
         function OnLinkClick(self) {
