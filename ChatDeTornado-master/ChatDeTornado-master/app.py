@@ -108,7 +108,7 @@ class AuthLoginHandler(BaseHandler):
             if password == password_true:
                 cursor.close()
                 connector.close()
- 
+
                 global myUser
                 myUser = username
                 #print("myUser:")
@@ -122,7 +122,7 @@ class AuthLoginHandler(BaseHandler):
 
 
 class AuthLogoutHandler(BaseHandler):
-    
+
     def get(self):
         self.clear_current_user()
         self.redirect('/')
@@ -192,7 +192,7 @@ class NotificationHandler(tornado.websocket.WebSocketHandler):
                 if waiter == self:
                     continue
                 waiter.write_message({'type': 1, 'username': myUser, 'img_path':img_path})
-        
+
     def on_message(self, message):
         message = json.loads(message)
         for waiter in self.waiters:
@@ -278,18 +278,15 @@ class ProfileHandler(BaseHandler):
 
 class ProfileViewHandler(BaseHandler):
     def get(self):
-        print("post")
         connector = sqlite3.connect("userdata.db")
         detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
         sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
         cursor = connector.cursor()
 
         name = self.get_argument("name")
-        sql = "select birthDay from users where username = '" + name + "'"
-        print(sql)
+        sql = "select birthday from users where username = '" + name + "'"
         cursor.execute(sql)
         result = cursor.fetchone()
-        print(result)
         self.render("profile.html",
                     name = name,
                     birthDay = result[0]
@@ -297,6 +294,28 @@ class ProfileViewHandler(BaseHandler):
         cursor.close()
         connector.close()
 
+class RegistrationHandler(BaseHandler):
+    def post(self):
+        name = self.get_argument("username")
+        password1 = self.get_argument("password_f")
+        password2 = self.get_argument("password_c")
+        birthy = self.get_argument("by")
+        birthm = self.get_argument("bm")
+        birthd = self.get_argument("bd")
+        birthDay = birthy + "-" + birthm.zfill(2) + "-" + birthd.zfill(2)
+        connector = sqlite3.connect("userdata.db")
+        detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+        sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
+        cursor = connector.cursor()
+        insert_sql = "insert into users (username, password, birthday) values('"+name+ "','" +password1+ "','" +birthDay + "')"
+        print(insert_sql)
+        cursor.execute(insert_sql)
+        connector.commit()
+        cursor.close()
+        connector.close()
+        myUser = name
+        self.set_current_user(name)
+        self.redirect("/")
 
 class Application(tornado.web.Application):
 
@@ -308,11 +327,10 @@ class Application(tornado.web.Application):
             url(r'/newgroup', GroupHandler),
             url(r'/auth/login', AuthLoginHandler),
             url(r'/auth/logout', AuthLogoutHandler),
-
             url(r'/profile', ProfileHandler),
             url(r'/profile/', ProfileViewHandler),
-
-            url(r'/notification',NotificationHandler)
+            url(r'/notification',NotificationHandler),
+            url(r'/auth/registration',RegistrationHandler),
 
         ]
         settings = dict(

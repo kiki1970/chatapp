@@ -151,3 +151,16 @@ img {
 .child_ac{
 	background-color: #D5E9F7;
 }
+
+.closebutton{
+	float: right;
+	text-align: right;
+}
+
+.spiny{
+	width: 50px;
+}
+
+.spinmd{
+	width: 30px;
+}
