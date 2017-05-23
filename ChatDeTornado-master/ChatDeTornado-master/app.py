@@ -11,6 +11,7 @@ import tornado.options
 from tornado.options import define, options
 import sqlite3
 import logging
+import datetime
 
 define("port", default=5000, type=int)
 define("username", default="user")
@@ -153,7 +154,7 @@ class IndexHandler(BaseHandler):
         for user in result:
             if user[0] != myUser:
                 userlist.append(user[0])
-        self.render('index.html', img_path=self.static_url('images/' + img_name),groups = grouplist,users = userlist)
+        self.render('index.html', img_path=self.static_url('images/' + img_name),groups = grouplist,users = userlist,myUser = myUser)
         cursor.close()
         connector.close()
 
@@ -257,17 +258,31 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
 
 class ProfileHandler(BaseHandler):
     def get(self):
-        self.render("profile.html");
+        self.render("profile.html",
+                    name = "",
+                    birthDay = ""
+                    )
 
-    def post(self, name):
+class ProfileViewHandler(BaseHandler):
+    def get(self):
         print("post")
         connector = sqlite3.connect("userdata.db")
+        detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+        sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
         cursor = connector.cursor()
 
-        name = self.get_argument("who")
-        sql = "select * from users where username = " + name
+        name = self.get_argument("name")
+        sql = "select birthDay from users where username = '" + name + "'"
         print(sql)
-        cursor.execute("select * from users where username = " + name)
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        print(result)
+        self.render("profile.html",
+                    name = name,
+                    birthDay = result[0]
+                    );
+        cursor.close()
+        connector.close()
 
 class Application(tornado.web.Application):
 
@@ -280,6 +295,7 @@ class Application(tornado.web.Application):
             url(r'/auth/login', AuthLoginHandler),
             url(r'/auth/logout', AuthLogoutHandler),
             url(r'/profile', ProfileHandler),
+            url(r'/profile/', ProfileViewHandler),
         ]
         settings = dict(
             cookie_secret='gaofjawpoer940r34823842398429afadfi4iias',
