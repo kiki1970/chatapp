@@ -1,7 +1,7 @@
 /* style sheets */
 .ui-chatbox {
     position: fixed;
-    bottom:20;
+    top:25;
     padding: 2px;
     background:  #48bdd5;
     border-radius: 10px 10px 0px 0px / 10px 10px 0px 0px;
@@ -28,7 +28,7 @@
 
 .ui-chatbox-log {
     padding: 3px;
-    height: 200px;
+    height: 600px;
     overflow-y: auto;
     overflow-x: hidden;
     background: #f5f5f5;
@@ -40,7 +40,7 @@
 }
 
 .ui-chatbox-input-box {
-    height: 50px;
+    height: 100px;
     width: 500px;
     resize: none;
     display: table-cell;
