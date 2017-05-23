@@ -142,6 +142,12 @@
 
         function onMessage(event) {
             var data = JSON.parse(event.data);
+            var options = {
+                body: data.message,
+                icon: data.img_path
+              }
+            //notify.createNotification("Hi there!",options);
+            //setTimeout(n.close.bind(n), 5000);
             if ('messages' in data) {
                 var messages = data.messages;
                 for (var i=0; i<messages.length; i++) {
