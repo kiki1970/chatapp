@@ -154,7 +154,7 @@ class IndexHandler(BaseHandler):
         for user in result:
             if user[0] != myUser:
                 userlist.append(user[0])
-        self.render('index.html', img_path=self.static_url('images/' + img_name),groups = grouplist,users = userlist,myUser = myUser)
+        self.render('index.html', img_path=self.static_url('images/' + img_name),groups = grouplist,users = userlist)
         cursor.close()
         connector.close()
 
