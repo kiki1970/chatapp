@@ -82,14 +82,6 @@
         }
 
         function onOpen(data) {
-          window.webkitNotifications.createNotification(
-                                      /* icon: プロフィールアイコン */
-                                      NULL,
-                                      /* title: スクリーンネーム */
-                                      "aa",
-                                      /* body: ツイート内容 */
-                                      "aa"
-                                  ).show();
         }
 
         function onClose() {
@@ -98,6 +90,12 @@
         function onMessage(event) {
 
             var data = JSON.parse(event.data);
+            var options = {
+                body: "testes",
+                icon: data.img_path
+              }
+            var n = new Notification("test",options);
+            n.createNotification("test",options);
             if ('messages' in data) {
                 var messages = data.messages;
                 for (var i=0; i<messages.length; i++) {
