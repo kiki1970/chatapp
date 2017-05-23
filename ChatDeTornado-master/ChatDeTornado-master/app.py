@@ -18,7 +18,11 @@ define("password", default="pass")
 
 myUser=""
 
+<<<<<<< HEAD
+
+=======
       
+>>>>>>> refs/remotes/origin/master
 class BaseHandler(tornado.web.RequestHandler):
 
     cookie_username = "username"
@@ -106,7 +110,7 @@ class AuthLoginHandler(BaseHandler):
             if password == password_true:
                 cursor.close()
                 connector.close()
- 
+
                 global myUser
                 myUser = username
                 #print("myUser:")
@@ -121,7 +125,7 @@ class AuthLoginHandler(BaseHandler):
 
 
 class AuthLogoutHandler(BaseHandler):
-    
+
     def get(self):
         self.clear_current_user()
         self.redirect('/')
@@ -209,6 +213,14 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         connector = sqlite3.connect("userdata.db")
         cursor = connector.cursor()
         self.waiters[self.groupnumber].append(self)
+<<<<<<< HEAD
+        cursor.execute("select message from messages where groupname='"+ nowgroup +"'")
+        result = cursor.fetchall()
+        if len(result) != 0:
+            for message in result:
+                message = json.loads(message[0])
+                self.write_message({'img_path': message['img_path'], 'message': message['message']})
+=======
         cursor.execute("select message,username from messages where groupname='"+ nowgroup +"'")
         result = cursor.fetchall()
         if len(result) != 0:
@@ -219,6 +231,7 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
                 else:
                     message = json.loads(message[0])
                     self.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
+>>>>>>> refs/remotes/origin/master
         cursor.close()
         connector.close()
         print(self.groupnumber)
@@ -230,9 +243,15 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         #self.messages[self.groupnumber].append(message)
         connector = sqlite3.connect("userdata.db")
         cursor = connector.cursor()
+<<<<<<< HEAD
+        insert_sql = 'insert into messages (groupname, message) values(?,?)'
+        print ("insert into messages (groupname, message) values('"+ self.groups[self.groupnumber] +"','"+ json.dumps(message, ensure_ascii=False) +"')")
+        values = (self.groups[self.groupnumber], json.dumps(message, ensure_ascii=False))
+=======
         insert_sql = 'insert into messages (groupname, message, username) values(?,?,?)'
         print ("insert into messages (groupname, message, username) values('"+ self.groups[self.groupnumber] +"','"+ json.dumps(message, ensure_ascii=False) +"','" + myUser +"')")
         values = (self.groups[self.groupnumber], json.dumps(message, ensure_ascii=False), myUser)
+>>>>>>> refs/remotes/origin/master
         cursor.execute(insert_sql,values)
         connector.commit()
         cursor.close()
@@ -247,6 +266,19 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         print(self.groupnumber)
         self.waiters[self.groupnumber].remove(self)
 
+class ProfileHandler(BaseHandler):
+    def get(self):
+        self.render("profile.html");
+
+    def post(self, name):
+        print("post")
+        connector = sqlite3.connect("userdata.db")
+        cursor = connector.cursor()
+
+        name = self.get_argument("who")
+        sql = "select * from users where username = " + name
+        print(sql)
+        cursor.execute("select * from users where username = " + name)
 
 class Application(tornado.web.Application):
 
@@ -258,6 +290,7 @@ class Application(tornado.web.Application):
             url(r'/newgroup', GroupHandler),
             url(r'/auth/login', AuthLoginHandler),
             url(r'/auth/logout', AuthLogoutHandler),
+            url(r'/profile', ProfileHandler),
         ]
         settings = dict(
             cookie_secret='gaofjawpoer940r34823842398429afadfi4iias',
