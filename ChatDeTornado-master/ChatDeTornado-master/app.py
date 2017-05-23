@@ -18,6 +18,8 @@ define("username", default="user")
 define("password", default="pass")
 
 myUser=""
+nowgroup=""
+img_path=""
 
 class BaseHandler(tornado.web.RequestHandler):
 
@@ -106,12 +108,11 @@ class AuthLoginHandler(BaseHandler):
             if password == password_true:
                 cursor.close()
                 connector.close()
-
+ 
                 global myUser
                 myUser = username
                 #print("myUser:")
                 #print(myUser)
-
                 self.set_current_user(username)
                 self.redirect("/")
             else:
@@ -121,7 +122,7 @@ class AuthLoginHandler(BaseHandler):
 
 
 class AuthLogoutHandler(BaseHandler):
-
+    
     def get(self):
         self.clear_current_user()
         self.redirect('/')
@@ -182,6 +183,26 @@ class IndexHandler(BaseHandler):
         cursor.close()
         connector.close()
 
+class NotificationHandler(tornado.websocket.WebSocketHandler):
+    waiters = []
+    def open(self, *args, **kwargs):
+        self.waiters.append(self)
+        if(self.get_argument("login")=='first'):
+            for waiter in self.waiters:
+                if waiter == self:
+                    continue
+                waiter.write_message({'type': 1, 'username': myUser, 'img_path':img_path})
+        
+    def on_message(self, message):
+        message = json.loads(message)
+        for waiter in self.waiters:
+            if waiter == self:
+                continue
+            print(message)
+            waiter.write_message({'type': 0, 'img_path': message['img_path'], 'message': message['message'],'groupname':nowgroup})
+    def on_close(self):
+        self.waiters.remove(self)
+
 class ChatHandler(tornado.websocket.WebSocketHandler):
 
     groups = ['all']
@@ -209,22 +230,16 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         connector = sqlite3.connect("userdata.db")
         cursor = connector.cursor()
         self.waiters[self.groupnumber].append(self)
-        cursor.execute("select message from messages where groupname='"+ nowgroup +"'")
-        result = cursor.fetchall()
-        if len(result) != 0:
-            for message in result:
-                message = json.loads(message[0])
-                self.write_message({'img_path': message['img_path'], 'message': message['message']})
         cursor.execute("select message,username from messages where groupname='"+ nowgroup +"'")
         result = cursor.fetchall()
         if len(result) != 0:
             for message in result:
                 if(message[1] == myUser):
                     message = json.loads(message[0])
-                    self.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': True})
+                    self.write_message({'type': 2, 'img_path': message['img_path'], 'message': message['message'], 'mymessage': True})
                 else:
                     message = json.loads(message[0])
-                    self.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
+                    self.write_message({'type': 2, 'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
         cursor.close()
         connector.close()
         print(self.groupnumber)
@@ -236,9 +251,6 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         #self.messages[self.groupnumber].append(message)
         connector = sqlite3.connect("userdata.db")
         cursor = connector.cursor()
-        insert_sql = 'insert into messages (groupname, message) values(?,?)'
-        print ("insert into messages (groupname, message) values('"+ self.groups[self.groupnumber] +"','"+ json.dumps(message, ensure_ascii=False) +"')")
-        values = (self.groups[self.groupnumber], json.dumps(message, ensure_ascii=False))
         insert_sql = 'insert into messages (groupname, message, username) values(?,?,?)'
         print ("insert into messages (groupname, message, username) values('"+ self.groups[self.groupnumber] +"','"+ json.dumps(message, ensure_ascii=False) +"','" + myUser +"')")
         values = (self.groups[self.groupnumber], json.dumps(message, ensure_ascii=False), myUser)
@@ -250,11 +262,12 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         for waiter in self.waiters[self.groupnumber]:
             if waiter == self:
                 continue
-            waiter.write_message({'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
+            waiter.write_message({'type': 2, 'img_path': message['img_path'], 'message': message['message'], 'mymessage': False})
 
     def on_close(self):
         print(self.groupnumber)
         self.waiters[self.groupnumber].remove(self)
+
 
 class ProfileHandler(BaseHandler):
     def get(self):
@@ -284,6 +297,7 @@ class ProfileViewHandler(BaseHandler):
         cursor.close()
         connector.close()
 
+
 class Application(tornado.web.Application):
 
     def __init__(self):
@@ -294,8 +308,12 @@ class Application(tornado.web.Application):
             url(r'/newgroup', GroupHandler),
             url(r'/auth/login', AuthLoginHandler),
             url(r'/auth/logout', AuthLogoutHandler),
+
             url(r'/profile', ProfileHandler),
             url(r'/profile/', ProfileViewHandler),
+
+            url(r'/notification',NotificationHandler)
+
         ]
         settings = dict(
             cookie_secret='gaofjawpoer940r34823842398429afadfi4iias',

@@ -113,16 +113,23 @@
 </script>
 <script>
         var query;
+        var permission = 'denied';
+        Notification.requestPermission(function(selectedPermission) {
+          permission = selectedPermission;
+        });
         if(window.location.search){
           query = document.location.search.substring(1);
           var socket = new WebSocket('ws://' + location.host + '/chat?group=' + query);
+          var socket2 = new WebSocket('ws://' + location.host + '/notification?login=notfirst');
         }else{
           query = 'all'
           var socket = new WebSocket('ws://' + location.host + '/chat?group=all');
+          var socket2 = new WebSocket('ws://' + location.host + '/notification?login=first');
         }
         socket.onopen = onOpen;
         socket.onclose = onClose;
         socket.onmessage = onMessage;
+        socket2.onmessage = onMessage;
 
         function sendAction(img_path, msg) {
 
@@ -132,6 +139,7 @@
             };
 
             socket.send(JSON.stringify(message));
+            socket2.send(JSON.stringify(message));
         }
 
         function onOpen(data) {
@@ -142,17 +150,25 @@
 
         function onMessage(event) {
             var data = JSON.parse(event.data);
-            if ('messages' in data) {
-                var messages = data.messages;
-                for (var i=0; i<messages.length; i++) {
-                    $("#chat_div").chatbox("option", "boxManager").addMsg(messages[i].img_path, messages[i].message, false);
-                }
-            } else {
-                $("#chat_div").chatbox("option", "boxManager").addMsg(data.img_path, data.message, false);
+            if(data.type == 0){
+              var notify = new Notification(data.groupname, { tag: 'tag', body: data.message, icon: data.img_path });
+            }
+            else if(data.type == 1){
+              var notify = new Notification("ログイン通知", { tag: 'tag', body: data.username+"がログインしました", icon: data.img_path });
+            }else if(data.type == 2){
+              if ('messages' in data) {
+                  var messages = data.messages;
+                  for (var i=0; i<messages.length; i++) {
+                      $("#chat_div").chatbox("option", "boxManager").addMsg(messages[i].img_path, messages[i].message, false);
+                  }
+              } else {
+                  $("#chat_div").chatbox("option", "boxManager").addMsg(data.img_path, data.message, data.mymessage);
+              }
             }
         }
         function OnLinkClick(self) {
             socket.close();
+            socket2.close();
             //socket = new WebSocket('ws://' + location.host + '/chat?group=' + self.firstChild.data);
             var target = document.getElementById("inLineFrame");
             var who = target.href;
