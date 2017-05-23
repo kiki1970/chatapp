@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <title></title>
+  </head>
+  <body>
+    <h1>newgroup</h1>
+    <form action="/newgroup" method="post">
+      {% module xsrf_form_html() %}
+      <p>groupname : <input type="text" name="groupname"/></p>
+      {% for i,user in enumerate(users) %}
+        <input type="checkbox" name="users" value="{{user}}">{{user}}<br>
+      {% end %}
+      <input type="submit" value="create"/><br>
+    </form>
+  </body>
+</html>
