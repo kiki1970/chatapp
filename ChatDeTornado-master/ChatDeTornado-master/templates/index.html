@@ -170,7 +170,11 @@
             socket.close();
             socket2.close();
             //socket = new WebSocket('ws://' + location.host + '/chat?group=' + self.firstChild.data);
-            location.href = "?" + self.firstChild.data
+            var target = document.getElementById("inLineFrame");
+            var who = target.href;
+          location.href = "?" + self.firstChild.data;
+          target.href = who;
+          console.log(who);
         }
 
         $(document).ready(function() {
@@ -188,11 +192,20 @@
         });
     </script>
 
-
     <script>
     function ifr(jpURL){
       waku.location = jpURL;
     }
+    </script>
+
+    <script>
+      function get_name(self){
+        self.href = "/profile/?name=" + self.firstChild.data;
+      }
+
+      function get_myName(self){
+
+      }
     </script>
 
 </head>
@@ -201,11 +214,9 @@
     <div id="accordion">
       <h3 class = "parent_ac">トーク一覧</h3>
         <div class = "child_ac">
-          <p>
             {% for groupname in groups %}
               <li><a href="javascript:void(0);" onclick="OnLinkClick(this);">{{groupname}}</a></li>
             {% end %}
-          </p>
         </div>
       <h3 class = "parent_ac">新しいトーク</h3>
         <div class = "child_ac">
@@ -221,9 +232,9 @@
       <h3 class = "parent_ac">プロフィール</h3>
         <div class = "child_ac">
           <ul>
-            <li><a href="/profile" target="waku" value="honda" onclick="get_name()">自分<a></li>
+            <li><a href="/profile/"+ target="waku">自分</a></li>
               {% for i,user in enumerate(users) %}
-            <li><a href="/profile" target="waku" value="{{user}}">{{user}}<br></a></li>
+            <li><a href="/profile" target="waku" onclick="get_name(this)">{{user}}<br></a></li>
               {% end %}
           </ul>
         </div>
@@ -246,7 +257,7 @@
           <p>何を設定するかは未定</p>
       </div>
     </div>
-    <p><iframe src="/profile" name="waku" width="100%" height="350"></iframe></p>
+    <p><iframe src="/profile" id = inLineFrame name="waku" width="100%" height="350"></iframe></p>
     <img src="{{ img_path }}" id="face" style="visibility:hidden">
     <div id="chat_div" class="chat"></div>
   </div>

@@ -11,6 +11,7 @@ import tornado.options
 from tornado.options import define, options
 import sqlite3
 import logging
+import datetime
 
 define("port", default=5000, type=int)
 define("username", default="user")
@@ -268,6 +269,35 @@ class ChatHandler(tornado.websocket.WebSocketHandler):
         self.waiters[self.groupnumber].remove(self)
 
 
+class ProfileHandler(BaseHandler):
+    def get(self):
+        self.render("profile.html",
+                    name = "",
+                    birthDay = ""
+                    )
+
+class ProfileViewHandler(BaseHandler):
+    def get(self):
+        print("post")
+        connector = sqlite3.connect("userdata.db")
+        detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+        sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
+        cursor = connector.cursor()
+
+        name = self.get_argument("name")
+        sql = "select birthDay from users where username = '" + name + "'"
+        print(sql)
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        print(result)
+        self.render("profile.html",
+                    name = name,
+                    birthDay = result[0]
+                    );
+        cursor.close()
+        connector.close()
+
+
 class Application(tornado.web.Application):
 
     def __init__(self):
@@ -278,7 +308,12 @@ class Application(tornado.web.Application):
             url(r'/newgroup', GroupHandler),
             url(r'/auth/login', AuthLoginHandler),
             url(r'/auth/logout', AuthLogoutHandler),
+
+            url(r'/profile', ProfileHandler),
+            url(r'/profile/', ProfileViewHandler),
+
             url(r'/notification',NotificationHandler)
+
         ]
         settings = dict(
             cookie_secret='gaofjawpoer940r34823842398429afadfi4iias',
