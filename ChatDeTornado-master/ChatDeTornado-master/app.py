@@ -11,7 +11,7 @@ import tornado.options
 from tornado.options import define, options
 import sqlite3
 import logging
-import datetime
+from datetime import datetime
 
 define("port", default=5000, type=int)
 define("username", default="user")
@@ -273,7 +273,9 @@ class ProfileHandler(BaseHandler):
     def get(self):
         self.render("profile.html",
                     name = "",
-                    birthDay = ""
+                    birthDay = "",
+                    date_start = "",
+                    date_finish = ""
                     )
 
 class ProfileViewHandler(BaseHandler):
@@ -287,9 +289,79 @@ class ProfileViewHandler(BaseHandler):
         sql = "select birthday from users where username = '" + name + "'"
         cursor.execute(sql)
         result = cursor.fetchone()
+        birthday = result[0]
+
+        today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        sql = "select date_start from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        print(sql)
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        date_startlist = []
+        if len(result) != 0:
+            for date_start in result:
+                date_startlist.append(date_start[0])
+
+        sql = "select date_finish from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        date_finishlist = []
+        if len(result) != 0:
+            for date_finish in result:
+                date_finishlist.append(date_finish[0])
+
         self.render("profile.html",
                     name = name,
-                    birthDay = result[0]
+                    birthDay = birthday,
+                    date_start = date_startlist,
+                    date_finish = date_finishlist
+                    );
+        cursor.close()
+        connector.close()
+
+class MyProfileHandler(BaseHandler):
+    def get(self):
+        connector = sqlite3.connect("userdata.db")
+        detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+        sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
+        cursor = connector.cursor()
+
+        name = myUser
+        sql = "select birthday from users where username = '" + name + "'"
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        birthday = result[0]
+
+        today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        sql = "select date_start from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        date_startlist = []
+        if len(result) != 0:
+            for date_start in result:
+                date_startlist.append(date_start[0])
+
+        sql = "select date_finish from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        date_finishlist = []
+        if len(result) != 0:
+            for date_finish in result:
+                date_finishlist.append(date_finish[0])
+
+        sql = "select contents from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        contentslist = []
+        if len(result) != 0:
+            for contents in result:
+                contentslist.append(contents[0])
+
+        self.render("myprofile.html",
+                    name = name,
+                    birthDay = birthday,
+                    date_start = date_startlist,
+                    date_finish = date_finishlist,
+                    contents = contentslist
                     );
         cursor.close()
         connector.close()
@@ -315,7 +387,7 @@ class RegistrationHandler(BaseHandler):
         connector.close()
         myUser = name
         self.set_current_user(name)
-        self.redirect("/")
+        self.redirect("/auth/login")
 
 class Application(tornado.web.Application):
 
@@ -331,7 +403,7 @@ class Application(tornado.web.Application):
             url(r'/profile/', ProfileViewHandler),
             url(r'/notification',NotificationHandler),
             url(r'/auth/registration',RegistrationHandler),
-
+            url(r'/profile/myprofile',MyProfileHandler)
         ]
         settings = dict(
             cookie_secret='gaofjawpoer940r34823842398429afadfi4iias',
