@@ -5,17 +5,19 @@
   </head>
   <body>
     <h3>名前:{{name}}</h3>
-    <h4>誕生日:{{birthDay}}<br>
-      予定</h4>
+    <h4>誕生日:{{birthDay}}</h4>
     <table>
+      <caption>予定</caption>
       <tr>
         <th>開始日時</th>
         <th>終了日時</th>
+        <th>予定内容</th>
       </tr>
-      {% for (date_s, date_f) in zip(date_start, date_finish) %}
+      {% for (date_s, date_f, con) in zip(date_start, date_finish, contents) %}
       <tr>
         <td>{{date_s}}</td>
         <td>{{date_f}}</td>
+        <td>{{con}}</td>
       </tr>
       {% end %}
   </body>
