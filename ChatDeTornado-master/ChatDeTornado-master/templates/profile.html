@@ -1,22 +1,28 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/style.css') }}" />
     <title></title>
   </head>
   <body>
     <h3>名前:{{name}}</h3>
-    <h4>誕生日:{{birthDay}}<br>
-      予定</h4>
-    <table>
-      <tr>
-        <th>開始日時</th>
-        <th>終了日時</th>
-      </tr>
-      {% for (date_s, date_f) in zip(date_start, date_finish) %}
-      <tr>
-        <td>{{date_s}}</td>
-        <td>{{date_f}}</td>
-      </tr>
-      {% end %}
+    <h4>誕生日:{{birthDay}}</h4>
+    <table class="table1">
+      <caption>予定</caption>
+      <thead>
+        <tr>
+          <th>開始日時</th>
+          <th>終了日時</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for (date_s, date_f) in zip(date_start, date_finish) %}
+        <tr>
+          <td>{{date_s}}</td>
+          <td>{{date_f}}</td>
+        </tr>
+        {% end %}
+      </tbody>
+    </table>
   </body>
 </html>

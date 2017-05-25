@@ -9,14 +9,22 @@
         var n = regform.username.value;
         var p1 = regform.password_f.value;
         var p2 = regform.password_c.value;
+        var by = regform.by.value;
+        var bm = regform.bm.value;
+        var bd = regform.bd.value;
+        var birth = new Date(by,bm-1,bd);
         if (n != ""){
           if (p1 == p2){
             if(p1 == "" && p2 == ""){
-              alert("パスワードを設定してください")
+              alert("パスワードを設定してください");
             }else{
-              alert("OK");
-              var target = document.getElementById("register");
-              target.submit();
+              if(birth.getFullYear() == by && (birth.getMonth() == bm-1) && birth.getDate() == bd){
+                alert("登録完了。ログイン画面に戻りますので再度ログインしてください。");
+                var target = document.getElementById("register");
+                target.submit();
+              }else{
+                alert("終了時間が不正です")
+              }
             }
           }else{
             alert("パスワードが確認用と一致しません");
@@ -42,7 +50,7 @@
         {% module xsrf_form_html() %}
         <p>username : <input type="text" name="username" class="closebutton"></p>
         <p>password : <input type="password" name="password_f" class="closebutton"></p>
-        <p>password(for check) : <input type="password" name="password_c" class="closebutton"></p>
+        <p>password(again) : <input type="password" name="password_c" class="closebutton"></p>
         <p>birthday : year:<input type="number" min="1870" value="1990" class="spiny" name="by">
           month:<input type="number" min="1" max="12" value="1" class="spinmd" name="bm">
           day:<input type="number" min="1" max="31" value="1" class="spinmd" name="bd"></p>
