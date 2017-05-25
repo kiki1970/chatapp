@@ -1,24 +1,214 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/style.css') }}" />
     <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script>
+      function check(self){
+        var sname = scheform.sname.value;
+        var sy = scheform.sy_s.value;
+        var sm = scheform.sm_s.value;
+        var sd = scheform.sd_s.value;
+        var sh = scheform.sh_s.value;
+        var smi = scheform.smi_s.value;
+        var start = new Date(sy,sm-1,sd,sh,smi);
+        var fy = scheform.sy_f.value;
+        var fm = scheform.sm_f.value;
+        var fd = scheform.sd_f.value;
+        var fh = scheform.sh_f.value;
+        var fmi = scheform.smi_f.value;
+        var finish = new Date(fy,fm-1,fd,fh,fmi);
+        // console.log(start.getFullYear(),sy, start.getMonth(),sm-1, start.getDate(),sd, start.getHours(),sh ,start.getMinutes(),smi)
+        // console.log(finish.getFullYear(),sy, finish.getMonth(),sm-1, finish.getDate(),sd, finish.getHours(),sh ,finish.getMinutes(),smi)
+        if(sname != ""){
+          if(start.getFullYear() == sy && (start.getMonth() == sm-1) && start.getDate() == sd && start.getHours() == sh && start.getMinutes() == smi){
+            if(finish.getFullYear() == fy && (finish.getMonth() == fm-1) && finish.getDate() == fd && finish.getHours() == fh && finish.getMinutes() == fmi){
+              if(sd <= fd){
+                var target = document.getElementById("addschedule");
+                target.submit();
+                // var mes = document.getElementById("message");
+                // document.mes.innerHTML("登録完了")
+              }else{
+                alert("終了日時が開始日時より早いです");
+              }
+            }else{
+              alert("終了時間が不正です")
+            }
+          }else{
+            alert("開始時間が不正です")
+          }
+        }else{
+          alert("件名がありません")
+        }
+      }
+    </script>
+
+    <script>
+      function echeck(self){
+        var sname = editscheform.sname.value;
+        var sy = editscheform.sy_s.value;
+        var sm = editscheform.sm_s.value;
+        var sd = editscheform.sd_s.value;
+        var sh = editscheform.sh_s.value;
+        var smi = editscheform.smi_s.value;
+        var start = new Date(sy,sm-1,sd,sh,smi);
+        var fy = editscheform.sy_f.value;
+        var fm = editscheform.sm_f.value;
+        var fd = editscheform.sd_f.value;
+        var fh = editscheform.sh_f.value;
+        var fmi = editscheform.smi_f.value;
+        var finish = new Date(fy,fm-1,fd,fh,fmi);
+        // console.log(start.getFullYear(),sy, start.getMonth(),sm-1, start.getDate(),sd, start.getHours(),sh ,start.getMinutes(),smi)
+        // console.log(finish.getFullYear(),sy, finish.getMonth(),sm-1, finish.getDate(),sd, finish.getHours(),sh ,finish.getMinutes(),smi)
+        if(sname != ""){
+          if(start.getFullYear() == sy && (start.getMonth() == sm-1) && start.getDate() == sd && start.getHours() == sh && start.getMinutes() == smi){
+            if(finish.getFullYear() == fy && (finish.getMonth() == fm-1) && finish.getDate() == fd && finish.getHours() == fh && finish.getMinutes() == fmi){
+              if(sd <= fd){
+                var target = document.getElementById("editschedule");
+                target.submit();
+                // var mes = document.getElementById("message");
+                // document.mes.innerHTML("登録完了")
+              }else{
+                alert("終了日時が開始日時より早いです");
+              }
+            }else{
+              alert("終了時間が不正です")
+            }
+          }else{
+            alert("開始時間が不正です")
+          }
+        }else{
+          alert("件名がありません")
+        }
+      }
+    </script>
+
+    <script>
+      function removeList(obj) {
+        // tbody要素に指定したIDを取得し、変数「tbody」に代入
+        var tbody = document.getElementById("table_body");
+        // objの親の親のノードを取得し（つまりtr要素）、変数「tr」に代入
+        var tr = obj.parentNode.parentNode;
+        // 「tbody」の子ノード「tr」を削除
+        tbody.removeChild(tr);
+      }
+    </script>
+
+    <script >
+      function get_table(i){
+        var target = document.getElementById(i)
+        target.submit()
+      }
+    </script>
+
+    <script>
+      function delete_sche(i){
+        var tf = confirm("消去してよろしいですか？")
+        if(tf == true){
+          var target = document.getElementById(i)
+          target.submit()
+        }
+      }
+    </script>
   </head>
+
+
+
   <body>
     <h3>名前:{{name}}</h3>
     <h4>誕生日:{{birthDay}}</h4>
-    <table>
+    <input type="button" value="追加" name="i" onclick="document.getElementById('dialog_add').showModal();">
+    <table class="table1">
       <caption>予定</caption>
-      <tr>
-        <th>開始日時</th>
-        <th>終了日時</th>
-        <th>予定内容</th>
-      </tr>
-      {% for (date_s, date_f, con) in zip(date_start, date_finish, contents) %}
-      <tr>
-        <td>{{date_s}}</td>
-        <td>{{date_f}}</td>
-        <td>{{con}}</td>
-      </tr>
-      {% end %}
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+          <th>開始日時</th>
+          <th>終了日時</th>
+          <th>予定内容</th>
+        </tr>
+      </thead>
+      <tbody id="table_body">
+        {% for (date_s, date_f, con, i) in zip(date_start, date_finish, contents, id) %}
+        <tr>
+          <td><input type="button" value="編集" onclick="document.getElementById('dialog_edit').showModal();"></td>
+          <!-- <form id="{{i}}" action="/profile/schedule/get" method="post"> -->
+            <!-- {% module xsrf_form_html() %} -->
+            <!-- <input type="hidden" value="{{i}}" name="i"> -->
+          <!-- </form> -->
+          <td><input type="button" value="削除" onclick="delete_sche({{i}})"></td>
+          <form id="{{i}}" action="/profile/schedule/delete" method="post">
+            {% module xsrf_form_html() %}
+            <input type="hidden" value="{{i}}" name="i">
+          </form>
+          <td>{{date_s}}</td>
+          <td>{{date_f}}</td>
+          <td>{{con}}</td>
+        </tr>
+        {% end %}
+      </tbody>
+    </table>
+
+    <dialog id="dialog_add">
+      <h2>予定追加</h2>
+      <form action="/profile/schedule/add" method="post" name="scheform" id="addschedule">
+        {% module xsrf_form_html() %}
+        <p>件名 : <input type="text" name="sname" class="sname"></p>
+        <p>開始時間 : <input type="number" min="1870" class="spiny" name="sy_s" id="sy_s">年
+          <input type="number" min="1" max="12" class="spinmd" name="sm_s" id="sm_s">月
+          <input type="number" min="1" max="31" class="spinmd" name="sd_s" id="sd_s">日
+          <input type="number" min="0" max="23" class="spinmd" name="sh_s" id="sh_s">:
+          <input type="number" min="0" max="59" class="spinmd" name="smi_s" id="smi_s"></p>
+          <p><div class="center">↓</div></p>
+        <p>終了時間 : <input type="number" min="1870" class="spiny" name="sy_f" id="sy_f">年
+          <input type="number" min="1" max="12" class="spinmd" name="sm_f" id="sm_f">月
+          <input type="number" min="1" max="31" class="spinmd" name="sd_f" id="sd_f">日
+          <input type="number" min="0" max="23" class="spinmd" name="sh_f" id="sh_f">:
+          <input type="number" min="0" max="59" class="spinmd" name="smi_f" id="smi_f"></p>
+          <script>
+              var hiduke=new Date();
+              document.getElementById("sy_s").value = hiduke.getFullYear();
+              document.getElementById("sm_s").value = hiduke.getMonth()+1;
+              document.getElementById("sd_s").value = hiduke.getDate();
+              document.getElementById("sh_s").value = hiduke.getHours();
+              document.getElementById("smi_s").value = hiduke.getMinutes();
+              document.getElementById("sy_f").value = hiduke.getFullYear();
+              document.getElementById("sm_f").value = hiduke.getMonth()+1;
+              document.getElementById("sd_f").value = hiduke.getDate();
+              document.getElementById("sh_f").value = hiduke.getHours();
+              document.getElementById("smi_f").value = hiduke.getMinutes();
+          </script>
+        <input type="button" value="予定追加" onclick="check(this)">
+        <div class="closebutton">
+          <input type="button" onclick="document.getElementById('dialog_add').close()" value="close">
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dialog_edit">
+      <h2>予定編集</h2>
+      <form action="/profile/schedule/edit" method="post" name="editscheform" id="editschedule">
+        {% module xsrf_form_html() %}
+        <p>件名 : <input type="text" name="sname" class="sname"></p>
+        <p>開始時間 : <input type="number" min="1870" class="spiny" name="sy_s" id="e_sy_s">年
+          <input type="number" min="1" max="12" class="spinmd" name="sm_s" id="e_sm_s">月
+          <input type="number" min="1" max="31" class="spinmd" name="sd_s" id="e_sd_s">日
+          <input type="number" min="0" max="23" class="spinmd" name="sh_s" id="e_sh_s">:
+          <input type="number" min="0" max="59" class="spinmd" name="smi_s" id="e_smi_s"></p>
+          <p><div class="center">↓</div></p>
+        <p>終了時間 : <input type="number" min="1870" class="spiny" name="sy_f" id="e_sy_f">年
+          <input type="number" min="1" max="12" class="spinmd" name="sm_f" id="e_sm_f">月
+          <input type="number" min="1" max="31" class="spinmd" name="sd_f" id="e_sd_f">日
+          <input type="number" min="0" max="23" class="spinmd" name="sh_f" id="e_sh_f">:
+          <input type="number" min="0" max="59" class="spinmd" name="smi_f" id="e_smi_f"></p>
+          <p><input type="hidden" name="i"></p>
+        <input type="button" value="編集完了" onclick="echeck(this)">
+        <div class="closebutton">
+          <input type="button" onclick="document.getElementById('dialog_edit').close()" value="close">
+        </div>
+      </form>
+    </dialog>
   </body>
 </html>

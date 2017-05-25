@@ -292,22 +292,26 @@ class ProfileViewHandler(BaseHandler):
         birthday = result[0]
 
         today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        sql = "select date_start from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        sql = "select date_start from schedules where person = '" + name + "' AND date_finish > '" + today + "' order by date_start asc"
         print(sql)
         cursor.execute(sql)
         result = cursor.fetchall()
         date_startlist = []
         if len(result) != 0:
             for date_start in result:
-                date_startlist.append(date_start[0])
+                date = date_start[0]
+                date = date[5:]
+                date_startlist.append(date)
 
-        sql = "select date_finish from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        sql = "select date_finish from schedules where person = '" + name + "' AND date_finish > '" + today + "' order by date_start asc"
         cursor.execute(sql)
         result = cursor.fetchall()
         date_finishlist = []
         if len(result) != 0:
             for date_finish in result:
-                date_finishlist.append(date_finish[0])
+                date = date_finish[0]
+                date = date[5:]
+                date_finishlist.append(date)
 
         self.render("profile.html",
                     name = name,
@@ -332,23 +336,28 @@ class MyProfileHandler(BaseHandler):
         birthday = result[0]
 
         today = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        sql = "select date_start from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        sql = "select date_start from schedules where person = '" + name + "' AND date_finish > '" + today + "' order by date_start asc"
         cursor.execute(sql)
         result = cursor.fetchall()
         date_startlist = []
         if len(result) != 0:
             for date_start in result:
-                date_startlist.append(date_start[0])
+                date = date_start[0]
+                date = date[5:]
+                print(date)
+                date_startlist.append(date)
 
-        sql = "select date_finish from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        sql = "select date_finish from schedules where person = '" + name + "' AND date_finish > '" + today + "' order by date_start asc"
         cursor.execute(sql)
         result = cursor.fetchall()
         date_finishlist = []
         if len(result) != 0:
             for date_finish in result:
-                date_finishlist.append(date_finish[0])
+                date = date_finish[0]
+                date = date[5:]
+                date_finishlist.append(date)
 
-        sql = "select contents from schedules where person = '" + name + "' AND date_finish > '" + today + "'"
+        sql = "select contents from schedules where person = '" + name + "' AND date_finish > '" + today + "' order by date_start asc"
         cursor.execute(sql)
         result = cursor.fetchall()
         contentslist = []
@@ -356,12 +365,21 @@ class MyProfileHandler(BaseHandler):
             for contents in result:
                 contentslist.append(contents[0])
 
+        sql = "select sche_id from schedules where person = '" + name + "' AND date_finish > '" + today + "' order by date_start asc"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        idlist = []
+        if len(result) != 0:
+            for i in result:
+                idlist.append(i[0])
+
         self.render("myprofile.html",
                     name = name,
                     birthDay = birthday,
                     date_start = date_startlist,
                     date_finish = date_finishlist,
-                    contents = contentslist
+                    contents = contentslist,
+                    id = idlist
                     );
         cursor.close()
         connector.close()
@@ -389,6 +407,85 @@ class RegistrationHandler(BaseHandler):
         self.set_current_user(name)
         self.redirect("/auth/login")
 
+class AddScheduleHandler(BaseHandler):
+    def post(self):
+        sname = self.get_argument("sname")
+        y_s = self.get_argument("sy_s")
+        m_s = self.get_argument("sm_s")
+        d_s = self.get_argument("sd_s")
+        h_s = self.get_argument("sh_s")
+        mi_s = self.get_argument("smi_s")
+        start = y_s + "-" + m_s.zfill(2) + "-" + d_s.zfill(2) + " " + h_s.zfill(2) + ":" + mi_s.zfill(2)
+        y_f = self.get_argument("sy_f")
+        m_f = self.get_argument("sm_f")
+        d_f = self.get_argument("sd_f")
+        h_f = self.get_argument("sh_f")
+        mi_f = self.get_argument("smi_f")
+        finish = y_f + "-" + m_f.zfill(2) + "-" + d_f.zfill(2) + " " + h_f.zfill(2) + ":" + mi_f.zfill(2)
+
+        connector = sqlite3.connect("userdata.db")
+        detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+        sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
+        cursor = connector.cursor()
+        insert_sql = "insert into schedules (person, date_start, date_finish, contents) values('"+myUser+ "','" +start+ "','" +finish+ "','" +sname+ "')"
+        print(insert_sql)
+        cursor.execute(insert_sql)
+        connector.commit()
+        cursor.close()
+        connector.close()
+        self.redirect("/profile/myprofile")
+
+class EditScheduleHandler(BaseHandler):
+    def post(self):
+        sname = self.get_argument("sname")
+        y_s = self.get_argument("sy_s")
+        m_s = self.get_argument("sm_s")
+        d_s = self.get_argument("sd_s")
+        h_s = self.get_argument("sh_s")
+        mi_s = self.get_argument("smi_s")
+        start = y_s + "-" + m_s.zfill(2) + "-" + d_s.zfill(2) + " " + h_s.zfill(2) + ":" + mi_s.zfill(2) + ":00"
+        y_f = self.get_argument("sy_f")
+        m_f = self.get_argument("sm_f")
+        d_f = self.get_argument("sd_f")
+        h_f = self.get_argument("sh_f")
+        mi_f = self.get_argument("smi_f")
+        finish = y_f + "-" + m_f.zfill(2) + "-" + d_f.zfill(2) + " " + h_f.zfill(2) + ":" + mi_f.zfill(2) + ":00"
+        i = self.get_argument("i")
+
+        connector = sqlite3.connect("userdata.db")
+        detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+        sqlite3.dbapi2.converters['DATETIME'] = sqlite3.dbapi2.converters['TIMESTAMP']
+        cursor = connector.cursor()
+        update_sql = "update schedules set date_start = '" +start+ "', date_finish = '" +finish+ "', contents = '" +sname+ "' where sche_id = " + i
+        print(update_sql)
+        cursor.execute(update_sql)
+        connector.commit()
+        cursor.close()
+        connector.close()
+        self.redirect("/profile/myprofile")
+
+class DeleteScheduleHandler(BaseHandler):
+    def post(self):
+        i = self.get_argument("i")
+
+        connector = sqlite3.connect("userdata.db")
+        cursor = connector.cursor()
+        delete_sql = "delete from schedules where sche_id = " + i
+        print(delete_sql)
+        cursor.execute(delete_sql)
+        connector.commit()
+        cursor.close()
+        connector.close()
+        self.redirect("/profile/myprofile")
+
+
+class GetScheduleHandler(BaseHandler):
+    def post(self):
+        i = self.get_argument("i")
+        print(i)
+        self.redirect("/profile/myprofile")
+
+
 class Application(tornado.web.Application):
 
     def __init__(self):
@@ -403,7 +500,11 @@ class Application(tornado.web.Application):
             url(r'/profile/', ProfileViewHandler),
             url(r'/notification',NotificationHandler),
             url(r'/auth/registration',RegistrationHandler),
-            url(r'/profile/myprofile',MyProfileHandler)
+            url(r'/profile/myprofile',MyProfileHandler),
+            url(r'/profile/schedule/add',AddScheduleHandler),
+            url(r'/profile/schedule/edit',EditScheduleHandler),
+            url(r'/profile/schedule/delete',DeleteScheduleHandler),
+            url(r'/profile/schedule/get',GetScheduleHandler)
         ]
         settings = dict(
             cookie_secret='gaofjawpoer940r34823842398429afadfi4iias',
