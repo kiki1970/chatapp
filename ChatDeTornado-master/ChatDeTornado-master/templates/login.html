@@ -16,21 +16,21 @@
         if (n != ""){
           if (p1 == p2){
             if(p1 == "" && p2 == ""){
-              alert("パスワードを設定してください");
+              alert("Error:Input password");
             }else{
               if(birth.getFullYear() == by && (birth.getMonth() == bm-1) && birth.getDate() == bd){
-                alert("登録完了。ログイン画面に戻りますので再度ログインしてください。");
+                alert("Completed!\nLogin again!");
                 var target = document.getElementById("register");
                 target.submit();
               }else{
-                alert("終了時間が不正です")
+                alert("Error:Invalid birthday!")
               }
             }
           }else{
-            alert("パスワードが確認用と一致しません");
+            alert("Error:Input \"same\" password into password(again)");
           }
         }else{
-          alert("名前を設定してください");
+          alert("Error:Input your name");
         }
       }
     </script>
@@ -54,7 +54,7 @@
         <p>birthday : year:<input type="number" min="1870" value="1990" class="spiny" name="by">
           month:<input type="number" min="1" max="12" value="1" class="spinmd" name="bm">
           day:<input type="number" min="1" max="31" value="1" class="spinmd" name="bd"></p>
-        <input type="button" value="Registration" onclick="check(this)">
+        <input type="button" value="Register" onclick="check(this)">
         <div class="closebutton">
           <input type="button" onclick="document.getElementById('dialog').close()" value="close">
         </div>

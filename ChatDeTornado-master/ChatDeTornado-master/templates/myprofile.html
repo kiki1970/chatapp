@@ -30,16 +30,16 @@
                 // var mes = document.getElementById("message");
                 // document.mes.innerHTML("登録完了")
               }else{
-                alert("終了日時が開始日時より早いです");
+                alert("Error:Finish date must be later than start date");
               }
             }else{
-              alert("終了時間が不正です")
+              alert("Error:Finish date is invarid")
             }
           }else{
-            alert("開始時間が不正です")
+            alert("Error:Start date is invarid")
           }
         }else{
-          alert("件名がありません")
+          alert("Error:Input event name")
         }
       }
     </script>
@@ -70,16 +70,16 @@
                 // var mes = document.getElementById("message");
                 // document.mes.innerHTML("登録完了")
               }else{
-                alert("終了日時が開始日時より早いです");
+                alert("Error:Finish date must be later than start date");
               }
             }else{
-              alert("終了時間が不正です")
+              alert("Error:Finish date is invarid")
             }
           }else{
-            alert("開始時間が不正です")
+            alert("Error:Start date is invarid")
           }
         }else{
-          alert("件名がありません")
+          alert("Error:Input event name")
         }
       }
     </script>
@@ -104,7 +104,7 @@
 
     <script>
       function delete_sche(i){
-        var tf = confirm("消去してよろしいですか？")
+        var tf = confirm("Do you wont to delete this event？")
         if(tf == true){
           var target = document.getElementById(i)
           target.submit()
@@ -116,29 +116,29 @@
 
 
   <body>
-    <h3>名前:{{name}}</h3>
-    <h4>誕生日:{{birthDay}}</h4>
-    <input type="button" value="追加" name="i" onclick="document.getElementById('dialog_add').showModal();">
+    <h3>Name:{{name}}</h3>
+    <h4>Birthday:{{birthDay}}</h4>
+    <input type="button" value="Add schedule" name="i" onclick="document.getElementById('dialog_add').showModal();">
     <table class="table1">
-      <caption>予定</caption>
+      <caption>Schedule</caption>
       <thead>
         <tr>
           <th></th>
           <th></th>
-          <th>開始日時</th>
-          <th>終了日時</th>
-          <th>予定内容</th>
+          <th>start date</th>
+          <th>finish date</th>
+          <th>event</th>
         </tr>
       </thead>
       <tbody id="table_body">
         {% for (date_s, date_f, con, i) in zip(date_start, date_finish, contents, id) %}
         <tr>
-          <td><input type="button" value="編集" onclick="document.getElementById('dialog_edit').showModal();"></td>
+          <td><input type="button" value="Edit" onclick="document.getElementById('dialog_edit').showModal();"></td>
           <!-- <form id="{{i}}" action="/profile/schedule/get" method="post"> -->
             <!-- {% module xsrf_form_html() %} -->
             <!-- <input type="hidden" value="{{i}}" name="i"> -->
           <!-- </form> -->
-          <td><input type="button" value="削除" onclick="delete_sche({{i}})"></td>
+          <td><input type="button" value="Delete" onclick="delete_sche({{i}})"></td>
           <form id="{{i}}" action="/profile/schedule/delete" method="post">
             {% module xsrf_form_html() %}
             <input type="hidden" value="{{i}}" name="i">
@@ -152,19 +152,19 @@
     </table>
 
     <dialog id="dialog_add">
-      <h2>予定追加</h2>
+      <h2>Add Schedule</h2>
       <form action="/profile/schedule/add" method="post" name="scheform" id="addschedule">
         {% module xsrf_form_html() %}
-        <p>件名 : <input type="text" name="sname" class="sname"></p>
-        <p>開始時間 : <input type="number" min="1870" class="spiny" name="sy_s" id="sy_s">年
-          <input type="number" min="1" max="12" class="spinmd" name="sm_s" id="sm_s">月
-          <input type="number" min="1" max="31" class="spinmd" name="sd_s" id="sd_s">日
+        <p>Event name : <input type="text" name="sname" class="sname"></p>
+        <p>Start date : <input type="number" min="1870" class="spiny" name="sy_s" id="sy_s">/
+          <input type="number" min="1" max="12" class="spinmd" name="sm_s" id="sm_s">/
+          <input type="number" min="1" max="31" class="spinmd" name="sd_s" id="sd_s">&nbsp;
           <input type="number" min="0" max="23" class="spinmd" name="sh_s" id="sh_s">:
           <input type="number" min="0" max="59" class="spinmd" name="smi_s" id="smi_s"></p>
           <p><div class="center">↓</div></p>
-        <p>終了時間 : <input type="number" min="1870" class="spiny" name="sy_f" id="sy_f">年
-          <input type="number" min="1" max="12" class="spinmd" name="sm_f" id="sm_f">月
-          <input type="number" min="1" max="31" class="spinmd" name="sd_f" id="sd_f">日
+        <p>Finish date : <input type="number" min="1870" class="spiny" name="sy_f" id="sy_f">/
+          <input type="number" min="1" max="12" class="spinmd" name="sm_f" id="sm_f">/
+          <input type="number" min="1" max="31" class="spinmd" name="sd_f" id="sd_f">&nbsp;
           <input type="number" min="0" max="23" class="spinmd" name="sh_f" id="sh_f">:
           <input type="number" min="0" max="59" class="spinmd" name="smi_f" id="smi_f"></p>
           <script>
@@ -180,7 +180,7 @@
               document.getElementById("sh_f").value = hiduke.getHours();
               document.getElementById("smi_f").value = hiduke.getMinutes();
           </script>
-        <input type="button" value="予定追加" onclick="check(this)">
+        <input type="button" value="Add" onclick="check(this)">
         <div class="closebutton">
           <input type="button" onclick="document.getElementById('dialog_add').close()" value="close">
         </div>
@@ -188,23 +188,23 @@
     </dialog>
 
     <dialog id="dialog_edit">
-      <h2>予定編集</h2>
+      <h2>Edit Schedule</h2>
       <form action="/profile/schedule/edit" method="post" name="editscheform" id="editschedule">
         {% module xsrf_form_html() %}
-        <p>件名 : <input type="text" name="sname" class="sname"></p>
-        <p>開始時間 : <input type="number" min="1870" class="spiny" name="sy_s" id="e_sy_s">年
-          <input type="number" min="1" max="12" class="spinmd" name="sm_s" id="e_sm_s">月
-          <input type="number" min="1" max="31" class="spinmd" name="sd_s" id="e_sd_s">日
+        <p>Event name : <input type="text" name="sname" class="sname"></p>
+        <p>Start date : <input type="number" min="1870" class="spiny" name="sy_s" id="e_sy_s">/
+          <input type="number" min="1" max="12" class="spinmd" name="sm_s" id="e_sm_s">/
+          <input type="number" min="1" max="31" class="spinmd" name="sd_s" id="e_sd_s">&nbsp;
           <input type="number" min="0" max="23" class="spinmd" name="sh_s" id="e_sh_s">:
           <input type="number" min="0" max="59" class="spinmd" name="smi_s" id="e_smi_s"></p>
           <p><div class="center">↓</div></p>
-        <p>終了時間 : <input type="number" min="1870" class="spiny" name="sy_f" id="e_sy_f">年
-          <input type="number" min="1" max="12" class="spinmd" name="sm_f" id="e_sm_f">月
-          <input type="number" min="1" max="31" class="spinmd" name="sd_f" id="e_sd_f">日
+        <p>Finish date : <input type="number" min="1870" class="spiny" name="sy_f" id="e_sy_f">/
+          <input type="number" min="1" max="12" class="spinmd" name="sm_f" id="e_sm_f">/
+          <input type="number" min="1" max="31" class="spinmd" name="sd_f" id="e_sd_f">&nbsp;
           <input type="number" min="0" max="23" class="spinmd" name="sh_f" id="e_sh_f">:
           <input type="number" min="0" max="59" class="spinmd" name="smi_f" id="e_smi_f"></p>
           <p><input type="hidden" name="i"></p>
-        <input type="button" value="編集完了" onclick="echeck(this)">
+        <input type="button" value="OK" onclick="echeck(this)">
         <div class="closebutton">
           <input type="button" onclick="document.getElementById('dialog_edit').close()" value="close">
         </div>

@@ -208,13 +208,13 @@
 <body>
   <div id = "menu">
     <div id="accordion">
-      <h3 class = "parent_ac">トーク一覧</h3>
+      <h3 class = "parent_ac">Talk List</h3>
         <div class = "child_ac">
             {% for groupname in groups %}
               <li><a href="javascript:void(0);" onclick="OnLinkClick(this);">{{groupname}}</a></li>
             {% end %}
         </div>
-      <h3 class = "parent_ac">新しいトーク</h3>
+      <h3 class = "parent_ac">New Talk</h3>
         <div class = "child_ac">
           <form action="/newgroup" method="post">
             {% module xsrf_form_html() %}
@@ -225,32 +225,31 @@
             <input type="submit" value="create"/><br>
           </form>
         </div>
-      <h3 class = "parent_ac">プロフィール</h3>
+      <h3 class = "parent_ac">Profile</h3>
         <div class = "child_ac">
           <ul>
-            <li><a href="/profile/myprofile" target="waku">自分</a></li>
+            <li><a href="/profile/myprofile" target="waku">My Profile</a></li>
               {% for i,user in enumerate(users) %}
             <li><a href="/profile" target="waku" onclick="get_name(this)">{{user}}<br></a></li>
               {% end %}
           </ul>
         </div>
-      <h3 class = "parent_ac">今日のトピック</h3>
+      <h3 class = "parent_ac">Today's Topics</h3>
         <div class = "child_ac">
           <ul>
-            話題：
+            Category：
             <select name = "topic" id = "topic_id" style = "width:80px">
-              <option value = "1">主要
-              <option value = "2">エンタメ
-              <option value = "3">スポーツ
+              <option value = "1">Main
+              <option value = "2">Entertainment
+              <option value = "3">Sport
             </select>
             <div id="feed">
             </div>
           </ul>
         </div>
-      <h3 class = "parent_ac">設定・その他</h3>
+      <h3 class = "parent_ac">Logout</h3>
         <div class = "child_ac">
           <a href=/auth/logout>Logout</a>
-          <p>何を設定するかは未定</p>
       </div>
     </div>
     <p><iframe src="/profile" id = inLineFrame name="waku" width="100%" height="400"></iframe></p>
