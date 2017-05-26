@@ -57,6 +57,7 @@ class GroupHandler(BaseHandler):
 
         groupname = self.get_argument("groupname")
         users = self.get_arguments("users")
+        users.append(myUser)
         usernames = ','.join(users)
         insert_sql = 'insert into groups (groupname, users) values(?,?)'
         values = (groupname, usernames)
@@ -143,7 +144,7 @@ class IndexHandler(BaseHandler):
         #print(img_name)
         connector = sqlite3.connect("userdata.db")
         cursor = connector.cursor()
-        cursor.execute("select groupname from groups")
+        cursor.execute("select groupname from groups where users like '%" +myUser+ "%'")
         result = cursor.fetchall()
         grouplist = []
         if len(result) != 0:
